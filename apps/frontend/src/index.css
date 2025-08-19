@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-gradient-to-br from-gray-50 to-blue-50 text-gray-800 font-mono;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  #root {
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-gray-200/50 rounded-xl shadow-sm;
+  }
+  
+  .glass-strong {
+    @apply bg-white/90 backdrop-blur-lg border border-gray-200 rounded-xl shadow-md;
+  }
+  
+  .writing-area {
+    @apply font-mono text-gray-800 placeholder-gray-400 bg-transparent resize-none outline-none;
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+  
+  .redacted {
+    filter: blur(4px);
+    transition: filter 0.3s ease;
+  }
+  
+  .particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #f59e0b);
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}

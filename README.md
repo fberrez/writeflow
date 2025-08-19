@@ -1,135 +1,144 @@
-# Turborepo starter
+# WriteFlow ✍️
 
-This Turborepo starter is maintained by the Turborepo core team.
+> An addictive writing app that gamifies the writing experience through immediate feedback, satisfying audio cues, and gentle constraints that encourage flow state.
 
-## Using this example
+![WriteFlow Interface](https://img.shields.io/badge/Built%20with-React%20%2B%20TypeScript-blue?style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-Next%20Generation%20Frontend%20Tooling-646CFF?style=flat-square)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-A%20utility--first%20CSS%20framework-38B2AC?style=flat-square)
 
-Run the following command:
+## ✨ Features
 
-```sh
-npx create-turbo@latest
-```
+### 🎵 **Immersive Audio Experience**
+- **5 Satisfying Sound Types**: Pop (bubble wrap), Click (mechanical), Chime (musical), Drop (zen water), Random variety
+- **Web Audio API**: High-quality, low-latency sound synthesis
+- **Goal Celebration**: Special audio plays when you reach your daily word count
 
-## What's inside?
+### 🎊 **Visual Feedback System**
+- **Real-time Particles**: Confetti appears exactly where you type with perfect cursor tracking
+- **Text Wrapping Support**: Particles follow your cursor even when text wraps to new lines
+- **Goal Explosion**: Dramatic confetti burst from your cursor when you reach daily goals
 
-This Turborepo includes the following packages/apps:
+### 🎯 **Gamification & Progress Tracking**
+- **Daily Word Goals**: Set and track your daily writing targets (default: 500 words)
+- **Real-time Stats**: Live word count, character count, and session duration
+- **Writing Streak**: Track consecutive days of writing
+- **Progress Bar**: Animated daily progress visualization
 
-### Apps and Packages
+### 🔒 **Focus Modes**
+- **Redact Mode**: Blur text while writing to prevent editing obsession
+- **No-Delete Mode**: Disable backspace/delete keys to maintain writing flow
+- **No-Copy/Paste Mode**: Block clipboard operations to prevent distractions
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### 🎨 **Beautiful Design**
+- **Zen White Theme**: Gentle, easy-on-the-eyes background
+- **Glassmorphism UI**: Modern frosted glass effects with backdrop blur
+- **Monospace Font**: Professional writing experience with JetBrains Mono
+- **Responsive Design**: Optimized for desktop writing sessions
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 🚀 Getting Started
 
-### Utilities
+### Prerequisites
+- Node.js 18+ 
+- pnpm (recommended) or npm
 
-This Turborepo has some additional tools already setup for you:
+### Installation
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/writeflow.git
+   cd writeflow
+   ```
 
-### Build
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-To build all apps and packages, run the following command:
+3. **Add celebration sound** (optional)
+   - Add your `celebrate.mp3` file to `apps/frontend/public/`
+   - The app will play this when you reach your daily goal
 
-```
-cd my-turborepo
+4. **Start development server**
+   ```bash
+   pnpm dev
+   ```
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+5. **Open your browser**
+   - Navigate to `http://localhost:5173`
+   - Start writing!
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+## 🐳 Docker Deployment
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### Quick Start with Docker
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+1. **Build and run with Docker Compose**
+   ```bash
+   docker-compose up -d
+   ```
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+2. **Access the application**
+   - Open `http://localhost:3000` in your browser
 
-### Develop
+### Development with Docker
 
-To develop all apps and packages, run the following command:
+1. **Run development environment**
+   ```bash
+   docker-compose --profile dev up
+   ```
 
-```
-cd my-turborepo
+2. **Access development server**
+   - Open `http://localhost:5173` in your browser
+   - Hot reloading enabled with volume mounting
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+### Manual Docker Commands
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+1. **Build the image**
+   ```bash
+   docker build -t writeflow-frontend .
+   ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+2. **Run the container**
+   ```bash
+   docker run -d -p 3000:80 --name writeflow-app writeflow-frontend
+   ```
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+3. **View logs**
+   ```bash
+   docker logs writeflow-app
+   ```
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+4. **Stop and remove**
+   ```bash
+   docker stop writeflow-app
+   docker rm writeflow-app
+   ```
 
-### Remote Caching
+## 🎮 How to Use
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### Basic Writing
+1. **Open WriteFlow** in your browser
+2. **Click in the writing area** and start typing
+3. **Watch particles appear** at your cursor as you type
+4. **Listen to satisfying sounds** with each keystroke
+5. **Track your progress** in the stats panel
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+### Settings & Customization
+- **Press `Ctrl/Cmd + ,`** to open settings
+- **Choose your sound type** from the dropdown
+- **Set your daily word goal** and press Enter to save
+- **Toggle focus modes** to eliminate distractions
+- **Hide stats** for a cleaner writing experience
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## 🤝 Contributing
 
-```
-cd my-turborepo
+We welcome contributions! Please follow the existing TypeScript and React patterns, use Tailwind CSS for styling, and write descriptive commit messages.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+## 📝 License
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+This project is licensed under the MIT License.
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+---
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+**Happy Writing!** ✍️✨
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+*WriteFlow - Where words flow like water and every keystroke counts.*
