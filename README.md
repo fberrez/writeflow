@@ -113,6 +113,35 @@
    docker rm writeflow-app
    ```
 
+## 🚀 Railway Deployment
+
+### Deploy to Railway
+
+1. **Connect your repository to Railway**
+   - Go to [railway.app](https://railway.app)
+   - Create a new project from your GitHub repository
+
+2. **Railway will automatically detect the Dockerfile**
+   - The build process will use the root `Dockerfile`
+   - No additional configuration needed
+
+3. **Environment Variables** (optional)
+   - Set `NODE_ENV=production` (automatically set by Railway)
+   - Configure custom domain if desired
+
+4. **Access your deployed app**
+   - Railway will provide a `.railway.app` domain
+   - Your app will be available at the provided URL
+
+### Railway Configuration
+
+The Dockerfile is optimized for Railway deployment:
+- ✅ **Multi-stage build** for optimal image size
+- ✅ **Nginx serving** for production performance  
+- ✅ **Health checks** for container monitoring
+- ✅ **Security headers** for production safety
+- ✅ **Asset caching** for improved performance
+
 ## 🎮 How to Use
 
 ### Basic Writing

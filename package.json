@@ -2,11 +2,20 @@
   "name": "writeflow",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+ "build": "turbo build",
+    "dev": "turbo dev",
+    "start": "turbo start",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "type-check": "turbo type-check",
+    "clean": "turbo clean",
+    "dev:backend": "pnpm dev --filter=@writeflow/backend",
+    "dev:frontend": "pnpm dev --filter=@writeflow/frontend",
+    "start:backend": "pnpm start --filter=@writeflow/backend",
+    "start:frontend": "pnpm start --filter=@writeflow/frontend",
+    "build:backend": "pnpm build --filter=@writeflow/backend",
+    "build:frontend": "pnpm build --filter=@writeflow/frontend",
+    "generate-api:frontend": "pnpm generate-api --filter=@writeflow/frontend"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

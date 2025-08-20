@@ -1,52 +1,15 @@
-version: '3.8'
-
 services:
-  writeflow-frontend:
+  frontend:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: production
+      dockerfile: apps/frontend/Dockerfile
     container_name: writeflow-frontend
     ports:
       - "3000:80"
-    environment:
-      - NODE_ENV=production
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 40s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.writeflow.rule=Host(`writeflow.local`)"
-      - "traefik.http.services.writeflow.loadbalancer.server.port=80"
-
-  # Development service
-  writeflow-dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: base
-    container_name: writeflow-frontend-dev
-    ports:
-      - "5173:5173"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/apps/frontend/node_modules
-    environment:
-      - NODE_ENV=development
-      - VITE_HOST=0.0.0.0
-      - VITE_PORT=5173
-    working_dir: /app/apps/frontend
-    command: pnpm dev --host 0.0.0.0 --port 5173
-    stdin_open: true
-    tty: true
-    profiles:
-      - dev
-
-networks:
-  default:
-    name: writeflow-network
+      start_period: 10s
