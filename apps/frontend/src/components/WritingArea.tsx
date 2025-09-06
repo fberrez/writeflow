@@ -103,7 +103,7 @@ export function WritingArea({
     }
   }, [settings.noCopyPasteMode]);
 
-  const handleCopy = useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  const handleCopy = useCallback(() => {
     // Allow copying even in no-paste mode for text export
     // Only paste operations should be blocked
   }, []);
@@ -114,7 +114,7 @@ export function WritingArea({
     }
   }, [settings.noCopyPasteMode]);
 
-  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLTextAreaElement>) => {
+  const handleContextMenu = useCallback(() => {
     // Allow context menu even in no-paste mode so users can copy text for export
     // Only paste operations will be blocked by the paste event handler
   }, []);

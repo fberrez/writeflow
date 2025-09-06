@@ -29,7 +29,7 @@ export function useWritingModes(settings: WritingSettings) {
     return true;
   }, [settings.noCopyPasteMode]);
 
-  const handleCopy = useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  const handleCopy = useCallback(() => {
     // Allow copying even in no-copy/paste mode for text export
     return true;
   }, []);
@@ -42,7 +42,7 @@ export function useWritingModes(settings: WritingSettings) {
     return true;
   }, [settings.noCopyPasteMode]);
 
-  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLTextAreaElement>) => {
+  const handleContextMenu = useCallback(() => {
     // Always allow context menu so users can copy text for export
     return true;
   }, []);
