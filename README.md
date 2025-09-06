@@ -1,6 +1,6 @@
 # WriteFlow ✍️
 
-> An addictive writing app that gamifies the writing experience through immediate feedback, satisfying audio cues, and gentle constraints that encourage flow state.
+> An addictive writing app that gamifies the writing experience through immediate feedback, visual effects, and gentle constraints that encourage flow state.
 
 ![WriteFlow Interface](https://img.shields.io/badge/Built%20with-React%20%2B%20TypeScript-blue?style=flat-square)
 ![Vite](https://img.shields.io/badge/Vite-Next%20Generation%20Frontend%20Tooling-646CFF?style=flat-square)
@@ -8,29 +8,39 @@
 
 ## ✨ Features
 
-### 🎵 **Immersive Audio Experience**
-- **5 Satisfying Sound Types**: Pop (bubble wrap), Click (mechanical), Chime (musical), Drop (zen water), Random variety
-- **Web Audio API**: High-quality, low-latency sound synthesis
-- **Goal Celebration**: Special audio plays when you reach your daily word count
-
 ### 🎊 **Visual Feedback System**
 - **Real-time Particles**: Confetti appears exactly where you type with perfect cursor tracking
 - **Text Wrapping Support**: Particles follow your cursor even when text wraps to new lines
 - **Goal Explosion**: Dramatic confetti burst from your cursor when you reach daily goals
+- **Session Persistence**: Your text and progress are automatically saved and restored
 
-### 🎯 **Gamification & Progress Tracking**
-- **Daily Word Goals**: Set and track your daily writing targets (default: 500 words)
-- **Real-time Stats**: Live word count, character count, and session duration
-- **Writing Streak**: Track consecutive days of writing
-- **Progress Bar**: Animated daily progress visualization
+### 🎯 **Dual Goal System**
+- **Word Count Goals**: Set daily word targets (default: 500 words)
+- **Timer Goals**: Set session duration targets (default: 25 minutes)
+- **Goal Type Selection**: Choose between word count or timer-based goals
+- **Real-time Progress**: Live tracking with animated progress visualization
+- **Goal Celebration**: Confetti explosion when you reach your target
+
+### 🔐 **Smart Settings Management**
+- **First-Visit Setup**: Settings panel opens automatically for new users
+- **Settings Lock**: Configuration locks until goal is reached, encouraging focus
+- **Goal Unlock**: Settings become available again after completing your target
+- **Persistent Preferences**: All settings are saved and restored between sessions
 
 ### 🔒 **Focus Modes**
 - **Redact Mode**: Blur text while writing to prevent editing obsession
 - **No-Delete Mode**: Disable backspace/delete keys to maintain writing flow
-- **No-Copy/Paste Mode**: Block clipboard operations to prevent distractions
+- **No Paste Mode**: Block paste/cut operations while allowing copy and select-all for text export
+
+### 📊 **Progress Tracking**
+- **Real-time Stats**: Live word count, character count, and session duration
+- **Writing Streak**: Track consecutive days of writing
+- **Session Timer**: Precise time tracking that continues after goal completion
+- **Progress Persistence**: All data saved automatically and restored on return
+- **Goal Continuation**: Timer keeps running after reaching targets for accurate session tracking
 
 ### 🎨 **Beautiful Design**
-- **Zen White Theme**: Gentle, easy-on-the-eyes background
+- **Stone Theme**: Gentle, warm colors that are easy on the eyes
 - **Glassmorphism UI**: Modern frosted glass effects with backdrop blur
 - **Monospace Font**: Professional writing experience with JetBrains Mono
 - **Responsive Design**: Optimized for desktop writing sessions
@@ -54,9 +64,10 @@
    pnpm install
    ```
 
-3. **Add celebration sound** (optional)
-   - Add your `celebrate.mp3` file to `apps/frontend/public/`
-   - The app will play this when you reach your daily goal
+3. **Configure your goals**
+   - On first visit, the settings panel will open automatically
+   - Choose between word count or timer goals
+   - Set your target and start writing!
 
 4. **Start development server**
    ```bash
@@ -65,6 +76,7 @@
 
 5. **Open your browser**
    - Navigate to `http://localhost:5173`
+   - Configure your goals in the settings panel
    - Start writing!
 
 ## 🐳 Docker Deployment
@@ -146,17 +158,20 @@ The Dockerfile is optimized for Railway deployment:
 
 ### Basic Writing
 1. **Open WriteFlow** in your browser
-2. **Click in the writing area** and start typing
-3. **Watch particles appear** at your cursor as you type
-4. **Listen to satisfying sounds** with each keystroke
+2. **Configure your goals** in the settings panel (opens automatically on first visit)
+3. **Choose goal type**: Word count or timer-based
+4. **Start writing** and watch particles appear at your cursor
 5. **Track your progress** in the stats panel
+6. **Reach your goal** to unlock settings and get confetti celebration!
 
 ### Settings & Customization
-- **Press `Ctrl/Cmd + ,`** to open settings
-- **Choose your sound type** from the dropdown
-- **Set your daily word goal** and press Enter to save
+- **Press `Ctrl/Cmd + ,`** to toggle settings (after initial setup)
+- **Click Reset button** to clear text and restart session
+- **Choose goal type**: Word count or timer goals
+- **Set your targets** and click "Start Writing Session"
 - **Toggle focus modes** to eliminate distractions
-- **Hide stats** for a cleaner writing experience
+- **Note**: Settings lock when session starts and unlock when goal is reached
+- **Goal reached**: Timer continues running, settings unlock, can start new session
 
 ## 🤝 Contributing
 

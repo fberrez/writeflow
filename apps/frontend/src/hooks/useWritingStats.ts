@@ -1,53 +1,104 @@
 import { useState, useEffect, useCallback } from 'react';
 import { countWords, countCharacters } from '@/utils';
-import type { WritingStats } from '@/types';
+import type { WritingStats, SessionData } from '@/types';
 
-export function useWritingStats(text: string, dailyGoal: number = 500) {
+export function useWritingStats(text: string, settings: { goalType: 'words' | 'timer'; dailyWordGoal: number; dailyTimerGoal: number; sessionStarted: boolean }, sessionData?: SessionData) {
   const [stats, setStats] = useState<WritingStats>({
     wordCount: 0,
     characterCount: 0,
     sessionDuration: 0,
-    dailyGoal,
+    dailyGoal: settings.goalType === 'words' ? settings.dailyWordGoal : settings.dailyTimerGoal,
     dailyProgress: 0,
     streak: 1, // Start with 1 for motivation
+    goalType: settings.goalType,
   });
 
-  const [sessionStartTime] = useState(Date.now());
+  const [sessionStartTime, setSessionStartTime] = useState(sessionData?.startTime || Date.now());
+  const [baseSessionTime] = useState(sessionData?.totalSessionTime || 0);
+  const [previousSessionStarted, setPreviousSessionStarted] = useState(settings.sessionStarted);
+
+  // Update session start time when session begins (transitions from false to true)
+  useEffect(() => {
+    if (settings.sessionStarted && !previousSessionStarted) {
+      // Session just started, reset the start time to now
+      setSessionStartTime(Date.now());
+      console.log('⏱️ Timer reset - session starting now');
+    }
+    setPreviousSessionStarted(settings.sessionStarted);
+  }, [settings.sessionStarted, previousSessionStarted]);
 
   // Update word and character counts when text changes
   useEffect(() => {
     const wordCount = countWords(text);
     const characterCount = countCharacters(text);
-    const dailyProgress = Math.min((wordCount / dailyGoal) * 100, 100);
+    
+    // Calculate progress based on goal type
+    let dailyProgress = 0;
+    const currentGoal = settings.goalType === 'words' ? settings.dailyWordGoal : settings.dailyTimerGoal;
+    
+    if (settings.goalType === 'words') {
+      dailyProgress = Math.min((wordCount / settings.dailyWordGoal) * 100, 100);
+    } else {
+      // Timer goal - progress based on session duration in minutes (only if session started)
+      if (settings.sessionStarted) {
+        const sessionMinutes = Math.floor(baseSessionTime / 1000 / 60) + Math.floor((Date.now() - sessionStartTime) / 1000 / 60);
+        dailyProgress = Math.min((sessionMinutes / settings.dailyTimerGoal) * 100, 100);
+      } else {
+        dailyProgress = 0; // No progress if session hasn't started
+      }
+    }
 
     setStats(prev => ({
       ...prev,
       wordCount,
       characterCount,
       dailyProgress,
-      dailyGoal,
+      dailyGoal: currentGoal,
+      goalType: settings.goalType,
     }));
-  }, [text, dailyGoal]);
+  }, [text, settings, baseSessionTime, sessionStartTime]);
 
-  // Update session duration every second
+  // Update session duration every second (only when session is started)
   useEffect(() => {
-    const interval = setInterval(() => {
-      const sessionDuration = Math.floor((Date.now() - sessionStartTime) / 1000);
+    if (!settings.sessionStarted) {
+      // If session hasn't started, keep duration at 0
       setStats(prev => ({
         ...prev,
-        sessionDuration,
+        sessionDuration: 0,
+      }));
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const currentSessionTime = Math.floor((Date.now() - sessionStartTime) / 1000);
+      const totalSessionDuration = Math.floor(baseSessionTime / 1000) + currentSessionTime;
+      
+      setStats(prev => ({
+        ...prev,
+        sessionDuration: totalSessionDuration,
       }));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [sessionStartTime]);
+  }, [sessionStartTime, baseSessionTime, settings.sessionStarted]);
 
-  const updateDailyGoal = useCallback((newGoal: number) => {
-    setStats(prev => ({
-      ...prev,
-      dailyGoal: newGoal,
-      dailyProgress: Math.min((prev.wordCount / newGoal) * 100, 100),
-    }));
+  const updateDailyGoal = useCallback((newGoal: number, goalType: 'words' | 'timer') => {
+    setStats(prev => {
+      let dailyProgress = 0;
+      if (goalType === 'words') {
+        dailyProgress = Math.min((prev.wordCount / newGoal) * 100, 100);
+      } else {
+        const sessionMinutes = Math.floor(prev.sessionDuration / 60);
+        dailyProgress = Math.min((sessionMinutes / newGoal) * 100, 100);
+      }
+      
+      return {
+        ...prev,
+        dailyGoal: newGoal,
+        dailyProgress,
+        goalType,
+      };
+    });
   }, []);
 
   return {

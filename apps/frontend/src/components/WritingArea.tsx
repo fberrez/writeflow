@@ -104,16 +104,20 @@ export function WritingArea({
   }, [settings.noCopyPasteMode]);
 
   const handleCopy = useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    // Allow copying even in no-paste mode for text export
+    // Only paste operations should be blocked
+  }, []);
+
+  const handleCut = useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     if (settings.noCopyPasteMode) {
-      event.preventDefault();
+      event.preventDefault(); // Block cut operations to prevent text loss
     }
   }, [settings.noCopyPasteMode]);
 
   const handleContextMenu = useCallback((event: React.MouseEvent<HTMLTextAreaElement>) => {
-    if (settings.noCopyPasteMode) {
-      event.preventDefault();
-    }
-  }, [settings.noCopyPasteMode]);
+    // Allow context menu even in no-paste mode so users can copy text for export
+    // Only paste operations will be blocked by the paste event handler
+  }, []);
 
   // Auto-focus the textarea on mount
   useEffect(() => {
@@ -145,7 +149,7 @@ export function WritingArea({
         onKeyDown={handleKeyDown}
         onPaste={handlePaste}
         onCopy={handleCopy}
-        onCut={handleCopy}
+        onCut={handleCut}
         onContextMenu={handleContextMenu}
         className={cn(
           "writing-area w-full h-full p-6 text-lg leading-relaxed",

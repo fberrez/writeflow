@@ -1,41 +1,46 @@
 # WriteFlow Frontend
 
-A React TypeScript writing interface that gamifies the writing experience with focus modes, real-time stats, and immersive effects.
+A React TypeScript writing interface that gamifies the writing experience with focus modes, real-time stats, visual effects, and smart session management.
 
 ## Features
 
 ### Core Writing Experience
-- **Clean, distraction-free textarea** with dark gradient theme
+- **Clean, distraction-free textarea** with warm stone gradient theme
 - **Real-time word and character counting**
-- **Session timer** tracking writing duration
-- **Daily word goal** with animated progress bar
+- **Session timer** that continues running after goal completion
+- **Dual goal system**: Word count or timer-based goals
 - **Writing streak counter** for motivation
+- **Smart session management** with explicit start/stop controls
 
 ### Immersive Effects
-- **Typewriter sound effects** using Web Audio API (toggle on/off)
 - **Visual particle effects** on keystrokes near cursor position
-- **Glassmorphism design** with backdrop blur effects
+- **Confetti celebrations** when goals are reached
+- **Glassmorphism design** with warm stone theme and backdrop blur effects
 - **Smooth animations** and micro-interactions
+- **Goal completion feedback** with visual celebrations
 
 ### Focus Modes
 - **Redact mode**: Blur/hide written text while maintaining layout
 - **No-delete mode**: Prevents backspace/delete keys
-- **No copy/paste mode**: Blocks Ctrl+C/V/X operations
+- **No paste mode**: Blocks paste/cut operations (copy and select-all allowed for export)
 
 ### Settings & Customization
-- **Settings panel** that slides in from corner
-- **Customizable daily word goals**
-- **Audio toggle** for typewriter sounds
+- **Settings panel** that slides in from corner with smart open/close behavior
+- **Dual goal system**: Choose between word count or timer goals
+- **Customizable targets**: Set daily word goals or session timer goals
 - **Individual toggle** for each focus mode
+- **Session control**: Explicit "Start Writing Session" button
+- **Settings lock**: Configuration locks during active sessions until goal completion
+- **Persistent storage**: All settings and progress saved automatically
 
 ## Tech Stack
 
 - **React 18** with TypeScript
 - **Vite** for fast development and building
-- **Tailwind CSS** for styling
+- **Tailwind CSS** for styling with custom stone theme
 - **Lucide React** for icons
-- **Web Audio API** for sound effects
-- **Custom hooks** for state management
+- **LocalStorage API** for data persistence
+- **Custom hooks** for state management and session control
 
 ## Getting Started
 
@@ -56,8 +61,9 @@ A React TypeScript writing interface that gamifies the writing experience with f
 
 ## Keyboard Shortcuts
 
-- `Ctrl/Cmd + ,` - Open settings panel
-- `Escape` - Close settings panel
+- `Ctrl/Cmd + ,` - Toggle settings panel (disabled during initial setup)
+- `Escape` - Close settings panel (disabled during initial setup)
+- **Reset button** - Clear text and reset session (opens settings panel)
 
 ## Architecture
 
@@ -76,18 +82,21 @@ The app is built with a modular architecture:
 
 ### Custom Hooks
 
-- **useWritingStats**: Tracks word count, character count, session time, and progress
-- **useAudio**: Manages Web Audio API for typewriter sounds
-- **useParticles**: Creates and manages particle effects on keystrokes
-- **useWritingModes**: Handles focus mode behaviors (no-delete, no-copy-paste)
+- **useWritingStats**: Tracks word count, character count, session time, and dual goal progress
+- **useParticles**: Creates and manages particle effects on keystrokes and goal celebrations
+- **useWritingModes**: Handles focus mode behaviors (no-delete, no-paste, redact mode)
+- **useGoalCelebration**: Manages confetti celebrations when goals are reached
 
 ## Design Philosophy
 
 WriteFlow is designed to create an **addictive writing experience** that encourages flow state through:
 
-1. **Immediate feedback** - Real-time stats and visual effects
+1. **Immediate feedback** - Real-time stats and visual particle effects
 2. **Gentle constraints** - Focus modes that remove distractions
-3. **Gamification** - Progress bars, streaks, and goals
-4. **Immersive atmosphere** - Dark theme, glassmorphism, and sound effects
+3. **Smart session management** - Explicit start/stop controls with settings that lock during active sessions
+4. **Dual goal system** - Choose between word count or timer-based targets
+5. **Gamification** - Progress bars, streaks, goals, and confetti celebrations
+6. **Warm aesthetic** - Stone theme with glassmorphism effects that are easy on the eyes
+7. **Persistent experience** - All data automatically saved and restored
 
-The interface prioritizes the writing experience above all else, with minimal UI that stays out of the way while providing essential feedback and motivation.
+The interface prioritizes the writing experience above all else, with minimal UI that stays out of the way while providing essential feedback and motivation. The session management ensures focus by locking settings until goals are reached, while the timer continues running for accurate session tracking.

@@ -1,172 +1,271 @@
----
-alwaysApply: true
----
-# WriteFlow - Addictive Writing App
-
-You are an expert AI programming assistant working on WriteFlow, an addictive writing app that gamifies the writing experience through immediate feedback, satisfying audio cues, and gentle constraints.
+# WriteFlow - Context Documentation
 
 ## Project Overview
 
-WriteFlow is a React + TypeScript application built with Vite in a Turborepo monorepo structure. The app focuses on creating an immersive, flow-state writing experience through:
+WriteFlow is an addictive writing application built with React and TypeScript that gamifies the writing experience through immediate feedback, visual effects, and gentle constraints that encourage flow state. The app focuses on creating an immersive, distraction-free writing environment with smart session management.
 
-- **Satisfying audio feedback** using Web Audio API
-- **Visual particle effects** that follow the user's cursor precisely
-- **Gamification elements** like daily goals, streaks, and progress tracking
-- **Focus modes** that eliminate distractions and encourage forward momentum
-- **Beautiful, distraction-free UI** with glassmorphism design
+## Tech Stack
+
+- **Frontend**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with custom stone theme
+- **Icons**: Lucide React
+- **Persistence**: LocalStorage API
+- **Deployment**: Docker + Railway
 
 ## Architecture
 
-### Tech Stack
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS with custom animations
-- **Monorepo**: Turborepo for project management
-- **Audio**: Web Audio API for real-time sound synthesis
-- **State Management**: React hooks (useState, useCallback, useEffect, useRef)
+### Core Components
 
-### Project Structure
-```
-writeflow/
-├── apps/frontend/          # Main React application
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── types/          # TypeScript interfaces
-│   │   ├── utils/          # Utility functions
-│   │   └── App.tsx         # Main app component
-│   └── public/celebrate.mp3 # Goal celebration sound
-├── packages/               # Shared configurations
-└── README.md
-```
+#### App.tsx
+- Main application orchestrator
+- Manages global state (text, settings, session data)
+- Handles persistence with localStorage
+- Manages session lifecycle and goal completion
+- Integrates all hooks and components
 
-## Core Features & Implementation
+#### WritingArea.tsx
+- Main textarea component with particle effects
+- Enforces writing modes (redact, no-delete, no-copy-paste)
+- Handles cursor tracking for particle effects
+- Responsive design with mobile warnings
 
-### 1. Audio System (`useAudio.ts`)
-- **5 Sound Types**: Pop, Click, Chime, Drop, Random
-- **Web Audio API**: Real-time synthesis with oscillators, filters, and envelopes
-- **Browser Compatibility**: Handles audio context policies and user interaction requirements
-- **Volume Control**: Adjustable gain nodes with test functionality
+#### SettingsPanel.tsx
+- Sliding panel from right side
+- Dual goal system: word count vs timer goals
+- Smart lock/unlock behavior during sessions
+- Bypass prevention during initial setup
+- Session start button with state-aware text
 
-### 2. Particle System (`useParticles.ts`)
-- **Cursor Tracking**: Particles appear exactly where the user types
-- **Text Wrapping**: Handles line breaks and text overflow correctly
-- **Boundary Clipping**: Particles stay within textarea boundaries
-- **Celebration Mode**: Explosive confetti burst from cursor on goal completion
-- **Performance**: Automatic cleanup and memory management
+#### StatsDisplay.tsx
+- Real-time statistics sidebar
+- Dynamic display based on goal type
+- Progress bars with different colors for word/timer goals
+- Session duration and goal progress tracking
 
-### 3. Writing Stats (`useWritingStats.ts`)
-- **Real-time Counting**: Word count, character count, session duration
-- **Daily Goals**: Configurable targets with progress tracking
-- **Streak System**: Consecutive writing days (placeholder for future persistence)
-- **Progress Animation**: Smooth progress bar updates
+### Custom Hooks
 
-### 4. Focus Modes (`useWritingModes.ts`)
-- **Redact Mode**: CSS blur filter to hide written text
-- **No-Delete Mode**: Prevents backspace/delete key functionality
-- **No-Copy/Paste Mode**: Blocks clipboard operations
-- **Keyboard Event Handling**: Intercepts and prevents specific key combinations
+#### useWritingStats
+- Tracks word count, character count, session duration
+- Dual goal system support (words vs timer)
+- Dynamic progress calculation based on goal type
+- Session start time management with proper timer reset
+- Persistence integration with session data
 
-### 5. Goal Celebration (`useGoalCelebration.ts`)
-- **Audio Playback**: Plays celebrate.mp3 on goal completion
-- **Confetti Trigger**: Initiates particle explosion at cursor position
-- **Session Tracking**: Prevents multiple celebrations per session
-- **Volume Control**: Automatic audio level management
+#### useParticles
+- Creates particle effects on keystrokes
+- Cursor position tracking with text wrapping support
+- Confetti celebrations for goal completion
+- Performance optimized particle lifecycle
 
-## UI Components
+#### useWritingModes
+- Implements focus modes (redact, no-delete, no-paste)
+- Keyboard event interception and prevention
+- Selective clipboard operation blocking (allows copy and select-all for export)
 
-### WritingArea (`WritingArea.tsx`)
-- **Textarea Management**: Full-screen writing interface with monospace font
-- **Cursor Position Calculation**: Precise measurement using temporary DOM elements
-- **Particle Positioning**: Accurate placement considering text wrapping and scrolling
-- **Event Handling**: Keyboard events, clipboard operations, focus management
+#### useGoalCelebration
+- Manages confetti celebrations when goals are reached
+- Cursor-based celebration positioning
+- Integration with goal completion logic
 
-### StatsDisplay (`StatsDisplay.tsx`)
-- **Real-time Updates**: Live display of writing metrics
-- **Progress Visualization**: Animated progress bars and counters
-- **Conditional Rendering**: Can be hidden via settings
-- **Icon Integration**: Lucide React icons for visual appeal
+### Utility Systems
 
-### SettingsPanel (`SettingsPanel.tsx`)
-- **Slide-out Panel**: Smooth animation from right edge
-- **Sound Selection**: Dropdown for choosing audio types with emojis
-- **Toggle Controls**: Custom switches for various modes
-- **Keyboard Shortcuts**: Enter key to close after goal changes
+#### Storage (utils/storage.ts)
+- Type-safe localStorage wrapper
+- Handles text, settings, and session persistence
+- Error handling for storage unavailability
+- Automatic serialization/deserialization
 
-## Design Principles
+#### Types (types/index.ts)
+- WritingSettings: All app configuration including dual goals
+- WritingStats: Real-time statistics with goal type awareness
+- SessionData: Persistence data structure
+- Comprehensive TypeScript coverage
 
-### User Experience
-- **Immediate Feedback**: Every keystroke should feel satisfying
-- **Flow State**: Minimize interruptions and maximize writing momentum
-- **Gamification**: Progress tracking without being overwhelming
-- **Accessibility**: Keyboard shortcuts and clear visual hierarchy
+## Key Features
 
-### Code Quality
-- **TypeScript**: Strict typing throughout the application
-- **React Patterns**: Proper hook usage, memoization, and lifecycle management
-- **Performance**: Efficient particle systems and audio handling
-- **Error Handling**: Graceful degradation when features fail
+### Smart Session Management
+- **Initial Setup**: Settings panel opens automatically for new users
+- **Session Start**: Explicit "Start Writing Session" button
+- **Settings Lock**: All settings disabled during active sessions
+- **Goal Unlock**: Settings unlock when goal is reached
+- **Bypass Prevention**: Cannot close settings during initial setup
+
+### Dual Goal System
+- **Word Count Goals**: Traditional word-based targets
+- **Timer Goals**: Session duration-based targets (minutes)
+- **Dynamic Progress**: Real-time calculation based on selected goal type
+- **Goal Continuation**: Timer continues running after goal completion
+- **Flexible Targets**: User-configurable goals for both types
+
+### Focus Modes
+- **Redact Mode**: Blurs text while maintaining layout
+- **No-Delete Mode**: Disables backspace/delete keys
+- **No Paste Mode**: Blocks paste/cut operations while allowing copy and select-all for text export
+- **Mode Enforcement**: Active during sessions, configurable when unlocked
+
+### Persistence & Data Management
+- **Text Persistence**: Automatic saving with debouncing
+- **Settings Persistence**: Immediate saving on changes
+- **Session Persistence**: Periodic saves and beforeunload handling
+- **Cross-Session Continuity**: Restore state on app reload
+- **Storage Safety**: Graceful handling of storage unavailability
 
 ### Visual Design
-- **Zen Aesthetic**: Clean, minimal interface with gentle colors
-- **Glassmorphism**: Frosted glass effects with backdrop blur
-- **Smooth Animations**: 60fps particle effects and UI transitions
-- **Typography**: JetBrains Mono for professional writing experience
+- **Stone Theme**: Warm, gentle colors (#fef7ed, #f5f5f4, rgba tones)
+- **Glassmorphism**: Backdrop blur effects with warm overlays
+- **Responsive**: Desktop-optimized with mobile warnings
+- **Accessibility**: Proper contrast and keyboard navigation
+- **Animation**: Smooth transitions and micro-interactions
+
+## User Experience Flow
+
+### First Visit
+1. Settings panel opens automatically
+2. User cannot close panel (X button hidden, shortcuts disabled)
+3. User configures goal type and target
+4. User clicks "🚀 Start Writing Session"
+5. Settings lock, timer starts from 0, panel closes
+
+### Active Session
+1. Timer counts up from 00:00
+2. All settings are locked and grayed out
+3. Particles appear on keystrokes
+4. Real-time progress tracking
+5. Focus modes are enforced
+
+### Goal Completion
+1. Confetti celebration at cursor position
+2. Settings automatically unlock
+3. Timer continues running (doesn't reset)
+4. Button changes to "🎉 Start New Session"
+5. User can modify settings or continue writing
+
+### Reset Flow
+1. User clicks reset button (confirmation if text exists)
+2. Text cleared, timer reset to 00:00
+3. Session state reset (sessionStarted: false)
+4. Settings unlocked
+5. Settings panel opens automatically
+6. Ready for new session configuration
 
 ## Development Guidelines
 
-### Code Style
-- Use TypeScript interfaces for all props and state
-- Prefer `useCallback` and `useMemo` for performance optimization
-- Follow React hooks rules and dependencies
-- Use Tailwind CSS classes with semantic naming
-- Add JSDoc comments for complex functions
-
-### Audio Implementation
-- Always handle browser audio policies (user interaction required)
-- Use `try/catch` blocks for Web Audio API calls
-- Implement volume controls and mute functionality
-- Test across different browsers for compatibility
-
-### Particle System
-- Ensure particles respect container boundaries
-- Handle text wrapping and scrolling correctly
-- Clean up particles automatically to prevent memory leaks
-- Use CSS transforms for smooth animations
-
 ### State Management
-- Keep state as local as possible
-- Use refs for values that don't trigger re-renders
-- Implement proper cleanup in useEffect hooks
-- Handle edge cases like rapid state changes
+- Use React hooks for local state
+- Minimize prop drilling with strategic state placement
+- Leverage useCallback for performance optimization
+- Implement proper dependency arrays for useEffect
 
-## Common Issues & Solutions
+### Performance Considerations
+- Debounce text saving (1 second delay)
+- Optimize particle rendering with cleanup
+- Use React.memo for expensive components
+- Minimize re-renders with proper state structure
 
-### Audio Problems
-- **No Sound**: Check browser audio policies, ensure user interaction
-- **Delayed Audio**: Reduce buffer sizes, optimize synthesis
-- **Browser Compatibility**: Test in Chrome, Firefox, Safari
+### Error Handling
+- Graceful localStorage failure handling
+- Type safety with TypeScript throughout
+- Input validation for user settings
+- Fallback values for missing data
 
-### Particle Alignment
-- **Cursor Mismatch**: Verify font metrics and padding calculations
-- **Text Wrapping**: Use proper DOM measurement techniques
-- **Boundary Issues**: Implement clipping and position clamping
+### Testing Approach
+- Focus on user flows rather than implementation details
+- Test session state transitions
+- Verify persistence across page reloads
+- Ensure keyboard shortcuts work correctly
 
-### Performance
-- **Memory Leaks**: Ensure particle cleanup and event listener removal
-- **Frame Drops**: Optimize animation loops and reduce particle count
-- **Bundle Size**: Use dynamic imports for large dependencies
+## Recent Major Changes
 
-## Future Enhancements
-- **Local Storage**: Persist settings and writing sessions
-- **Backend Integration**: User accounts and cloud sync
-- **Mobile Support**: Touch-optimized interface
-- **Themes**: Multiple color schemes and customization
-- **Export Features**: Save writing to various formats
+### Sound System Removal
+- Completely removed Web Audio API integration
+- Removed useAudio hook and all sound-related UI
+- Simplified user experience without audio distractions
 
-## Testing Strategy
-- **Manual Testing**: Cross-browser compatibility and feature validation
-- **Performance Testing**: Memory usage and frame rate monitoring
-- **Accessibility Testing**: Keyboard navigation and screen reader support
-- **Audio Testing**: Various devices and browser configurations
+### Timer System Overhaul
+- Fixed timer to start from 0 when session begins
+- Timer continues running after goal completion
+- Proper session state management with sessionStarted flag
+- Reset functionality properly stops and resets timer
 
-Remember: WriteFlow is about creating an addictive, joyful writing experience. Every feature should contribute to the flow state and make writing feel satisfying and rewarding.
+### Settings Lock Enhancement
+- Settings lock when session starts (not on setting change)
+- Explicit "Start Writing Session" button required
+- Settings unlock only when goal is reached
+- Bypass prevention during initial setup
+
+### UI/UX Improvements
+- Stone theme with warm, gentle colors
+- Improved number input handling (disabled scroll)
+- Better border styling for form fields
+- Enhanced button states and feedback
+
+## File Structure
+
+```
+apps/frontend/src/
+├── components/
+│   ├── GoalCelebration.tsx    # Confetti celebration component
+│   ├── SettingsPanel.tsx      # Main settings interface
+│   ├── StatsDisplay.tsx       # Real-time statistics
+│   ├── WritingArea.tsx        # Main textarea with effects
+│   └── index.ts               # Component exports
+├── hooks/
+│   ├── useGoalCelebration.ts  # Goal completion celebrations
+│   ├── useParticles.ts        # Particle effect system
+│   ├── useWritingModes.ts     # Focus mode enforcement
+│   ├── useWritingStats.ts     # Statistics and progress tracking
+│   └── index.ts               # Hook exports
+├── types/
+│   └── index.ts               # TypeScript definitions
+├── utils/
+│   ├── storage.ts             # localStorage utilities
+│   └── index.ts               # Utility exports
+├── App.tsx                    # Main application component
+├── main.tsx                   # Application entry point
+└── index.css                  # Global styles and theme
+```
+
+## Configuration Files
+
+- **tailwind.config.js**: Custom stone theme colors and utilities
+- **vite.config.ts**: Build configuration with path aliases
+- **tsconfig.json**: TypeScript configuration with strict mode
+- **Dockerfile**: Multi-stage production build
+- **docker-compose.yml**: Development and production environments
+
+## Deployment
+
+### Local Development
+```bash
+pnpm install
+pnpm dev
+```
+
+### Docker Production
+```bash
+docker-compose up -d
+```
+
+### Railway Deployment
+- Automatic detection of Dockerfile
+- Multi-stage build for optimized images
+- Nginx serving for production performance
+- Health checks and security headers included
+
+## Future Considerations
+
+### Potential Enhancements
+- Cloud synchronization for cross-device persistence
+- Writing analytics and insights
+- Custom themes and personalization
+- Export functionality for completed sessions
+- Social features and writing challenges
+
+### Technical Debt
+- Consider moving to a more robust state management solution for complex features
+- Implement proper error boundaries for better error handling
+- Add comprehensive test coverage
+- Consider PWA features for offline functionality
+
+This documentation should be updated as the application evolves and new features are added.

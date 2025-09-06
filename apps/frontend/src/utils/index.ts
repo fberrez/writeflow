@@ -36,3 +36,6 @@ export function getRandomParticleDirection(): { dx: number; dy: number } {
     dy: Math.sin(angle) * speed,
   };
 }
+
+// Re-export storage utilities
+export * from './storage';

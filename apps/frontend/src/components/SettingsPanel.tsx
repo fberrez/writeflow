@@ -1,14 +1,16 @@
 import React from 'react';
-import { X, Volume2, VolumeX, Eye, EyeOff, Lock, Unlock, Copy, CopyX, Target, BarChart3, BarChart } from 'lucide-react';
+import { X, Eye, EyeOff, Lock, Unlock, Copy, CopyX, Target, BarChart3, BarChart, Clock, FileText, LockIcon } from 'lucide-react';
 import { cn } from '@/utils';
-import type { WritingSettings } from '@/types';
+import type { WritingSettings, WritingStats } from '@/types';
+import { version } from '../../package.json';
 
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   settings: WritingSettings;
   onUpdateSettings: (settings: Partial<WritingSettings>) => void;
-  onTestSound?: () => void;
+  onStartSession: () => void;
+  stats: WritingStats;
   className?: string;
 }
 
@@ -17,20 +19,34 @@ export function SettingsPanel({
   onClose,
   settings,
   onUpdateSettings,
+  onStartSession,
+  stats,
   className,
 }: SettingsPanelProps) {
-  const handleDailyGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleWordGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(event.target.value, 10);
     if (!isNaN(value) && value > 0) {
       onUpdateSettings({ dailyWordGoal: value });
     }
   };
 
-  const handleDailyGoalKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTimerGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value, 10);
+    if (!isNaN(value) && value > 0) {
+      onUpdateSettings({ dailyTimerGoal: value });
+    }
+  };
+
+  const handleGoalKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       onClose();
     }
+  };
+
+  const handleWheel = (event: React.WheelEvent<HTMLInputElement>) => {
+    // Prevent scroll wheel from changing number input values
+    event.currentTarget.blur();
   };
 
   return (
@@ -38,8 +54,8 @@ export function SettingsPanel({
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40"
-          onClick={onClose}
+          className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-40"
+          onClick={(!settings.isFirstVisit || settings.sessionStarted || stats.dailyProgress >= 100) ? onClose : undefined}
         />
       )}
 
@@ -54,229 +70,308 @@ export function SettingsPanel({
         <div className="p-6 h-full flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">Settings</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-stone-800">Settings</h2>
+              {settings.settingsLocked && (
+                <div title="Settings locked until goal is reached">
+                  <LockIcon className="w-4 h-4 text-amber-600" />
+                </div>
+              )}
+            </div>
+            {/* Only show close button if not first visit or if session has started or goal is reached */}
+            {(!settings.isFirstVisit || settings.sessionStarted || stats.dailyProgress >= 100) && (
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-stone-600" />
+              </button>
+            )}
           </div>
 
-          {/* Settings */}
-          <div className="space-y-6 flex-1">
-            {/* Sound Effects */}
+          {settings.settingsLocked && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-sm text-amber-800 flex items-center gap-2">
+                <LockIcon className="w-4 h-4" />
+                Writing session in progress! Settings are locked until you reach your goal.
+              </p>
+            </div>
+          )}
+
+          {settings.isFirstVisit && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                👋 Welcome to WriteFlow! Configure your settings to get started.
+              </p>
+            </div>
+          )}
+
+          {/* Settings Content */}
+          <div className="flex-1 overflow-y-auto space-y-6">
+            {/* Goal Type Selection */}
             <div className="space-y-3">
-              <h3 className="text-lg font-medium text-gray-800">Audio</h3>
-              <button
-                onClick={() => onUpdateSettings({ soundEnabled: !settings.soundEnabled })}
-                className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  {settings.soundEnabled ? (
-                    <Volume2 className="w-5 h-5 text-green-500" />
-                  ) : (
-                    <VolumeX className="w-5 h-5 text-gray-500" />
-                  )}
-                  <span className="text-gray-800">Typing Sounds</span>
-                </div>
-                <div
+              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Goal Type
+              </h3>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => !settings.settingsLocked && onUpdateSettings({ goalType: 'words' })}
+                  disabled={settings.settingsLocked}
                   className={cn(
-                    "w-12 h-6 rounded-full transition-colors",
-                    settings.soundEnabled ? "bg-green-500" : "bg-gray-300"
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border transition-colors",
+                    settings.goalType === 'words' 
+                      ? "bg-blue-50 border-blue-200 text-blue-800" 
+                      : "bg-stone-50 border-stone-200 text-stone-700",
+                    settings.settingsLocked && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  <div
-                    className={cn(
-                      "w-5 h-5 bg-white rounded-full mt-0.5 transition-transform shadow-sm",
-                      settings.soundEnabled ? "translate-x-6" : "translate-x-0.5"
-                    )}
-                  />
-                </div>
-              </button>
+                  <FileText className="w-5 h-5" />
+                  <span className="text-sm font-medium">Words</span>
+                </button>
+                
+                <button
+                  onClick={() => !settings.settingsLocked && onUpdateSettings({ goalType: 'timer' })}
+                  disabled={settings.settingsLocked}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-3 rounded-lg border transition-colors",
+                    settings.goalType === 'timer' 
+                      ? "bg-green-50 border-green-200 text-green-800" 
+                      : "bg-stone-50 border-stone-200 text-stone-700",
+                    settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  <Clock className="w-5 h-5" />
+                  <span className="text-sm font-medium">Timer</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Goal Settings */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Daily Goal
+              </h3>
               
-              {/* Sound Type Selection */}
-              {settings.soundEnabled && (
+              {settings.goalType === 'words' ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Sound Type</label>
-                  <select
-                    value={settings.soundType}
-                    onChange={(e) => onUpdateSettings({ soundType: e.target.value as WritingSettings['soundType'] })}
-                    className="w-full p-2 bg-white border border-gray-200 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="random">🎲 Random (Variety)</option>
-                    <option value="pop">🫧 Pop (Bubble wrap)</option>
-                    <option value="click">🖱️ Click (Mechanical)</option>
-                    <option value="chime">🎵 Chime (Musical)</option>
-                    <option value="drop">💧 Drop (Water zen)</option>
-                  </select>
+                  <label className="text-sm font-medium text-stone-700">Word Count Target</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="10000"
+                    value={settings.dailyWordGoal}
+                    onChange={handleWordGoalChange}
+                    onKeyDown={handleGoalKeyDown}
+                    onWheel={handleWheel}
+                    disabled={settings.settingsLocked}
+                    className={cn(
+                      "w-full p-2 border border-stone-300 rounded-lg text-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+                      settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                    )}
+                    style={{background: 'rgba(254, 251, 247, 0.8)'}}
+                    placeholder="500"
+                  />
+                  <p className="text-xs text-stone-500">Press Enter to save</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-stone-700">Timer Goal (minutes)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="480"
+                    value={settings.dailyTimerGoal}
+                    onChange={handleTimerGoalChange}
+                    onKeyDown={handleGoalKeyDown}
+                    onWheel={handleWheel}
+                    disabled={settings.settingsLocked}
+                    className={cn(
+                      "w-full p-2 border border-stone-300 rounded-lg text-stone-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500",
+                      settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                    )}
+                    style={{background: 'rgba(254, 251, 247, 0.8)'}}
+                    placeholder="25"
+                  />
+                  <p className="text-xs text-stone-500">Press Enter to save</p>
                 </div>
               )}
             </div>
 
             {/* Display Options */}
             <div className="space-y-3">
-              <h3 className="text-lg font-medium text-gray-800">Display</h3>
+              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                Display Options
+              </h3>
               
-              {/* Show Stats */}
+              {/* Show Stats Toggle */}
               <button
-                onClick={() => onUpdateSettings({ showStats: !settings.showStats })}
-                className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                onClick={() => !settings.settingsLocked && onUpdateSettings({ showStats: !settings.showStats })}
+                disabled={settings.settingsLocked}
+                className={cn(
+                  "flex items-center justify-between w-full p-3 rounded-lg border transition-colors",
+                  settings.showStats 
+                    ? "bg-green-50 border-green-200 text-green-800" 
+                    : "bg-stone-50 border-stone-200 text-stone-700",
+                  settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                )}
               >
-                <div className="flex items-center space-x-3">
+                <span className="flex items-center gap-2">
                   {settings.showStats ? (
-                    <BarChart3 className="w-5 h-5 text-blue-500" />
+                    <BarChart3 className="w-4 h-4" />
                   ) : (
-                    <BarChart className="w-5 h-5 text-gray-500" />
+                    <BarChart className="w-4 h-4" />
                   )}
-                  <div className="text-left">
-                    <div className="text-gray-800">Show Statistics</div>
-                    <div className="text-xs text-gray-500">Display word count and progress</div>
-                  </div>
-                </div>
-                <div
-                  className={cn(
-                    "w-12 h-6 rounded-full transition-colors",
-                    settings.showStats ? "bg-blue-500" : "bg-gray-300"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "w-5 h-5 bg-white rounded-full mt-0.5 transition-transform shadow-sm",
-                      settings.showStats ? "translate-x-6" : "translate-x-0.5"
-                    )}
-                  />
+                  Show Statistics
+                </span>
+                <div className={cn(
+                  "w-11 h-6 rounded-full transition-colors relative",
+                  settings.showStats ? "bg-green-500" : "bg-stone-300"
+                )}>
+                  <div className={cn(
+                    "w-4 h-4 bg-white rounded-full absolute top-1 transition-transform",
+                    settings.showStats ? "translate-x-6" : "translate-x-1"
+                  )} />
                 </div>
               </button>
             </div>
 
-            {/* Writing Modes */}
+            {/* Focus Modes */}
             <div className="space-y-3">
-              <h3 className="text-lg font-medium text-gray-800">Writing Modes</h3>
+              <h3 className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Focus Modes
+              </h3>
               
               {/* Redact Mode */}
               <button
-                onClick={() => onUpdateSettings({ redactMode: !settings.redactMode })}
-                className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                onClick={() => !settings.settingsLocked && onUpdateSettings({ redactMode: !settings.redactMode })}
+                disabled={settings.settingsLocked}
+                className={cn(
+                  "flex items-center justify-between w-full p-3 rounded-lg border transition-colors",
+                  settings.redactMode 
+                    ? "bg-purple-50 border-purple-200 text-purple-800" 
+                    : "bg-stone-50 border-stone-200 text-stone-700",
+                  settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                )}
               >
-                <div className="flex items-center space-x-3">
+                <span className="flex items-center gap-2">
                   {settings.redactMode ? (
-                    <EyeOff className="w-5 h-5 text-purple-500" />
+                    <EyeOff className="w-4 h-4" />
                   ) : (
-                    <Eye className="w-5 h-5 text-gray-500" />
+                    <Eye className="w-4 h-4" />
                   )}
-                  <div className="text-left">
-                    <div className="text-gray-800">Redact Mode</div>
-                    <div className="text-xs text-gray-500">Blur text while writing</div>
-                  </div>
-                </div>
-                <div
-                  className={cn(
-                    "w-12 h-6 rounded-full transition-colors",
-                    settings.redactMode ? "bg-purple-500" : "bg-gray-300"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "w-5 h-5 bg-white rounded-full mt-0.5 transition-transform shadow-sm",
-                      settings.redactMode ? "translate-x-6" : "translate-x-0.5"
-                    )}
-                  />
+                  Redact Mode
+                </span>
+                <div className={cn(
+                  "w-11 h-6 rounded-full transition-colors relative",
+                  settings.redactMode ? "bg-purple-500" : "bg-stone-300"
+                )}>
+                  <div className={cn(
+                    "w-4 h-4 bg-white rounded-full absolute top-1 transition-transform",
+                    settings.redactMode ? "translate-x-6" : "translate-x-1"
+                  )} />
                 </div>
               </button>
-
+              
               {/* No Delete Mode */}
               <button
-                onClick={() => onUpdateSettings({ noDeleteMode: !settings.noDeleteMode })}
-                className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                onClick={() => !settings.settingsLocked && onUpdateSettings({ noDeleteMode: !settings.noDeleteMode })}
+                disabled={settings.settingsLocked}
+                className={cn(
+                  "flex items-center justify-between w-full p-3 rounded-lg border transition-colors",
+                  settings.noDeleteMode 
+                    ? "bg-orange-50 border-orange-200 text-orange-800" 
+                    : "bg-stone-50 border-stone-200 text-stone-700",
+                  settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                )}
               >
-                <div className="flex items-center space-x-3">
+                <span className="flex items-center gap-2">
                   {settings.noDeleteMode ? (
-                    <Lock className="w-5 h-5 text-red-500" />
+                    <Lock className="w-4 h-4" />
                   ) : (
-                    <Unlock className="w-5 h-5 text-gray-500" />
+                    <Unlock className="w-4 h-4" />
                   )}
-                  <div className="text-left">
-                    <div className="text-gray-800">No Delete Mode</div>
-                    <div className="text-xs text-gray-500">Prevent backspace/delete</div>
-                  </div>
-                </div>
-                <div
-                  className={cn(
-                    "w-12 h-6 rounded-full transition-colors",
-                    settings.noDeleteMode ? "bg-red-500" : "bg-gray-300"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "w-5 h-5 bg-white rounded-full mt-0.5 transition-transform shadow-sm",
-                      settings.noDeleteMode ? "translate-x-6" : "translate-x-0.5"
-                    )}
-                  />
+                  No-Delete Mode
+                </span>
+                <div className={cn(
+                  "w-11 h-6 rounded-full transition-colors relative",
+                  settings.noDeleteMode ? "bg-orange-500" : "bg-stone-300"
+                )}>
+                  <div className={cn(
+                    "w-4 h-4 bg-white rounded-full absolute top-1 transition-transform",
+                    settings.noDeleteMode ? "translate-x-6" : "translate-x-1"
+                  )} />
                 </div>
               </button>
-
-              {/* No Copy/Paste Mode */}
+              
+              {/* No Paste Mode */}
               <button
-                onClick={() => onUpdateSettings({ noCopyPasteMode: !settings.noCopyPasteMode })}
-                className="flex items-center justify-between w-full p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                onClick={() => !settings.settingsLocked && onUpdateSettings({ noCopyPasteMode: !settings.noCopyPasteMode })}
+                disabled={settings.settingsLocked}
+                className={cn(
+                  "flex items-center justify-between w-full p-3 rounded-lg border transition-colors",
+                  settings.noCopyPasteMode 
+                    ? "bg-red-50 border-red-200 text-red-800" 
+                    : "bg-stone-50 border-stone-200 text-stone-700",
+                  settings.settingsLocked && "opacity-50 cursor-not-allowed"
+                )}
               >
-                <div className="flex items-center space-x-3">
+                <span className="flex items-center gap-2">
                   {settings.noCopyPasteMode ? (
-                    <CopyX className="w-5 h-5 text-orange-500" />
+                    <CopyX className="w-4 h-4" />
                   ) : (
-                    <Copy className="w-5 h-5 text-gray-500" />
+                    <Copy className="w-4 h-4" />
                   )}
-                  <div className="text-left">
-                    <div className="text-gray-800">No Copy/Paste</div>
-                    <div className="text-xs text-gray-500">Block copy/paste operations</div>
-                  </div>
-                </div>
-                <div
-                  className={cn(
-                    "w-12 h-6 rounded-full transition-colors",
-                    settings.noCopyPasteMode ? "bg-orange-500" : "bg-gray-300"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "w-5 h-5 bg-white rounded-full mt-0.5 transition-transform shadow-sm",
-                      settings.noCopyPasteMode ? "translate-x-6" : "translate-x-0.5"
-                    )}
-                  />
+                  No Paste Mode
+                </span>
+                <div className={cn(
+                  "w-11 h-6 rounded-full transition-colors relative",
+                  settings.noCopyPasteMode ? "bg-red-500" : "bg-stone-300"
+                )}>
+                  <div className={cn(
+                    "w-4 h-4 bg-white rounded-full absolute top-1 transition-transform",
+                    settings.noCopyPasteMode ? "translate-x-6" : "translate-x-1"
+                  )} />
                 </div>
               </button>
-            </div>
-
-            {/* Daily Goal */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium text-gray-800">Goals</h3>
-              <div className="p-3 rounded-lg bg-gray-50">
-                <div className="flex items-center space-x-3 mb-2">
-                  <Target className="w-5 h-5 text-amber-500" />
-                  <span className="text-gray-800">Daily Word Goal</span>
-                </div>
-                <input
-                  type="number"
-                  min="1"
-                  max="10000"
-                  value={settings.dailyWordGoal}
-                  onChange={handleDailyGoalChange}
-                  onKeyDown={handleDailyGoalKeyDown}
-                  className="w-full p-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter daily word goal..."
-                />
-                <div className="text-xs text-gray-500 mt-1">
-                  Press Enter to close settings
-                </div>
-              </div>
             </div>
           </div>
 
+          {/* Start Session / Goal Status Button */}
+          {!settings.settingsLocked && (
+            <div className="mt-6">
+              {stats.dailyProgress >= 100 ? (
+                <button
+                  onClick={onStartSession}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  🎉 Start New Session
+                </button>
+              ) : (
+                <button
+                  onClick={onStartSession}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  🚀 Start Writing Session
+                </button>
+              )}
+              <p className="text-xs text-stone-500 text-center mt-2">
+                {stats.dailyProgress >= 100 
+                  ? "Congratulations! You can now configure a new session."
+                  : "Settings will lock until you reach your goal"
+                }
+              </p>
+            </div>
+          )}
+
           {/* Footer */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              WriteFlow v1.0 - Focus. Write. Flow.
+          <div className="mt-6 pt-4 border-t border-stone-200">
+            <p className="text-xs text-stone-500 text-center">
+              WriteFlow v{version} - Focus. Write. Flow.
             </p>
           </div>
         </div>

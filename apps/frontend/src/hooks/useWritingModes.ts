@@ -9,12 +9,13 @@ export function useWritingModes(settings: WritingSettings) {
       return false;
     }
 
-    // No copy/paste mode: prevent Ctrl+C, Ctrl+V, Ctrl+X
+    // No paste mode: prevent Ctrl+V, Ctrl+X (but allow Ctrl+C and Ctrl+A for export)
     if (settings.noCopyPasteMode && (event.ctrlKey || event.metaKey)) {
-      if (event.key === 'c' || event.key === 'v' || event.key === 'x' || event.key === 'a') {
+      if (event.key === 'v' || event.key === 'x') {
         event.preventDefault();
         return false;
       }
+      // Allow Ctrl+C for copying and Ctrl+A for selecting all text for export
     }
 
     return true;
@@ -29,12 +30,9 @@ export function useWritingModes(settings: WritingSettings) {
   }, [settings.noCopyPasteMode]);
 
   const handleCopy = useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    if (settings.noCopyPasteMode) {
-      event.preventDefault();
-      return false;
-    }
+    // Allow copying even in no-copy/paste mode for text export
     return true;
-  }, [settings.noCopyPasteMode]);
+  }, []);
 
   const handleCut = useCallback((event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     if (settings.noCopyPasteMode) {
@@ -45,12 +43,9 @@ export function useWritingModes(settings: WritingSettings) {
   }, [settings.noCopyPasteMode]);
 
   const handleContextMenu = useCallback((event: React.MouseEvent<HTMLTextAreaElement>) => {
-    if (settings.noCopyPasteMode) {
-      event.preventDefault();
-      return false;
-    }
+    // Always allow context menu so users can copy text for export
     return true;
-  }, [settings.noCopyPasteMode]);
+  }, []);
 
   return {
     handleKeyDown,
