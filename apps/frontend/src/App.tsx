@@ -7,7 +7,7 @@ import { SettingsPanel } from '@/components/SettingsPanel';
 import { useWritingStats } from '@/hooks/useWritingStats';
 import { useParticles } from '@/hooks/useParticles';
 import { useWritingModes } from '@/hooks/useWritingModes';
-import { useGoalCelebration } from '@/hooks/useGoalCelebration';
+ import { useGoalCelebration } from '@/hooks/useGoalCelebration';
 import { textStorage, settingsStorage, sessionStorage, isStorageAvailable } from '@/utils';
 import type { WritingSettings, SessionData } from '@/types';
 
@@ -122,7 +122,7 @@ function App() {
       checkGoalCompletion(stats.dailyProgress, handleCelebration);
       
       // Unlock settings when goal is reached (but keep session running)
-      if (stats.dailyProgress >= 100 && settings.settingsLocked) {
+      if (stats.goalReachedCount > 0 && settings.settingsLocked) {
         setSettings(prev => ({ 
           ...prev, 
           settingsLocked: false
@@ -131,7 +131,7 @@ function App() {
         console.log('🎉 Goal reached! Settings unlocked, timer continues running.');
       }
     }
-  }, [stats.dailyProgress, checkGoalCompletion, handleCelebration, settings.settingsLocked, settings.sessionStarted]);
+  }, [stats.dailyProgress, stats.goalReachedCount, checkGoalCompletion, handleCelebration, settings.settingsLocked, settings.sessionStarted]);
 
   const handleSettingsUpdate = useCallback((newSettings: Partial<WritingSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));

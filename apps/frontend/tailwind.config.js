@@ -14,6 +14,7 @@ export default {
         'slide-in': 'slideIn 0.3s ease-out',
         'particle-float': 'particleFloat 0.8s ease-out forwards',
         'progress-fill': 'progressFill 0.5s ease-out forwards',
+        'stack-slide-in': 'stackSlideIn 0.6s ease-out',
       },
       keyframes: {
         fadeIn: {
@@ -31,6 +32,11 @@ export default {
         progressFill: {
           '0%': { width: '0%' },
           '100%': { width: 'var(--progress)' },
+        },
+        stackSlideIn: {
+          '0%': { transform: 'translateY(-4px) scale(0.95)', opacity: '0' },
+          '50%': { transform: 'translateY(-2px) scale(0.98)', opacity: '0.5' },
+          '100%': { transform: 'translateY(var(--stack-offset, 0px)) scale(1)', opacity: 'var(--stack-opacity, 1)' },
         },
       },
       backdropBlur: {

@@ -9,6 +9,7 @@ export function useWritingStats(text: string, settings: { goalType: 'words' | 't
     sessionDuration: 0,
     dailyGoal: settings.goalType === 'words' ? settings.dailyWordGoal : settings.dailyTimerGoal,
     dailyProgress: 0,
+    goalReachedCount: 0,
     streak: 1, // Start with 1 for motivation
     goalType: settings.goalType,
   });
@@ -34,17 +35,23 @@ export function useWritingStats(text: string, settings: { goalType: 'words' | 't
     
     // Calculate progress based on goal type
     let dailyProgress = 0;
+    let goalReachedCount = 0;
     const currentGoal = settings.goalType === 'words' ? settings.dailyWordGoal : settings.dailyTimerGoal;
     
     if (settings.goalType === 'words') {
-      dailyProgress = Math.min((wordCount / settings.dailyWordGoal) * 100, 100);
+      const rawProgress = (wordCount / settings.dailyWordGoal) * 100;
+      dailyProgress = rawProgress;
+      goalReachedCount = Math.floor(rawProgress / 100);
     } else {
       // Timer goal - progress based on session duration in minutes (only if session started)
       if (settings.sessionStarted) {
         const sessionMinutes = Math.floor(baseSessionTime / 1000 / 60) + Math.floor((Date.now() - sessionStartTime) / 1000 / 60);
-        dailyProgress = Math.min((sessionMinutes / settings.dailyTimerGoal) * 100, 100);
+        const rawProgress = (sessionMinutes / settings.dailyTimerGoal) * 100;
+        dailyProgress = rawProgress;
+        goalReachedCount = Math.floor(rawProgress / 100);
       } else {
         dailyProgress = 0; // No progress if session hasn't started
+        goalReachedCount = 0;
       }
     }
 
@@ -53,6 +60,7 @@ export function useWritingStats(text: string, settings: { goalType: 'words' | 't
       wordCount,
       characterCount,
       dailyProgress,
+      goalReachedCount,
       dailyGoal: currentGoal,
       goalType: settings.goalType,
     }));
@@ -85,17 +93,24 @@ export function useWritingStats(text: string, settings: { goalType: 'words' | 't
   const updateDailyGoal = useCallback((newGoal: number, goalType: 'words' | 'timer') => {
     setStats(prev => {
       let dailyProgress = 0;
+      let goalReachedCount = 0;
+      
       if (goalType === 'words') {
-        dailyProgress = Math.min((prev.wordCount / newGoal) * 100, 100);
+        const rawProgress = (prev.wordCount / newGoal) * 100;
+        dailyProgress = rawProgress;
+        goalReachedCount = Math.floor(rawProgress / 100);
       } else {
         const sessionMinutes = Math.floor(prev.sessionDuration / 60);
-        dailyProgress = Math.min((sessionMinutes / newGoal) * 100, 100);
+        const rawProgress = (sessionMinutes / newGoal) * 100;
+        dailyProgress = rawProgress;
+        goalReachedCount = Math.floor(rawProgress / 100);
       }
       
       return {
         ...prev,
         dailyGoal: newGoal,
         dailyProgress,
+        goalReachedCount,
         goalType,
       };
     });

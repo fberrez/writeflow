@@ -4,6 +4,7 @@ export interface WritingStats {
   sessionDuration: number;
   dailyGoal: number;
   dailyProgress: number;
+  goalReachedCount: number;
   streak: number;
   goalType: 'words' | 'timer';
 }

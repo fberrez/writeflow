@@ -75,6 +75,18 @@
     border-radius: 50%;
     background: linear-gradient(45deg, #a855f7, #ec4899, #f59e0b);
   }
+  
+  .progress-stack {
+    position: relative;
+  }
+  
+  .progress-stack .progress-bar {
+    transition: all 0.5s ease-out;
+  }
+  
+  .progress-stack .progress-bar:not(:first-child) {
+    animation: stackSlideIn 0.6s ease-out;
+  }
 }
 
 @layer utilities {
