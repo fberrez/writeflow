@@ -7,6 +7,7 @@ import { SettingsPanel } from '@/components/SettingsPanel';
 import { useWritingStats } from '@/hooks/useWritingStats';
 import { useParticles } from '@/hooks/useParticles';
 import { useWritingModes } from '@/hooks/useWritingModes';
+import { useGoalCelebration } from '@/hooks/useGoalCelebration';
 import { textStorage, settingsStorage, sessionStorage, isStorageAvailable } from '@/utils';
 import type { WritingSettings, SessionData } from '@/types';
 
@@ -44,6 +45,7 @@ function App() {
   }, sessionData);
   const { particles, createParticle, createCelebrationConfetti } = useParticles();
   const { handleKeyDown } = useWritingModes(settings);
+  const { checkGoalCompletion, resetCelebration } = useGoalCelebration();
 
   const handleCelebration = useCallback(() => {
     // Use the last known cursor position for the celebration
@@ -116,11 +118,11 @@ function App() {
 
   // Check for goal completion
   useEffect(() => {
-    if (stats.dailyProgress >= 100 && settings.sessionStarted) {
-      handleCelebration();
+    if (settings.sessionStarted) {
+      checkGoalCompletion(stats.dailyProgress, handleCelebration);
       
       // Unlock settings when goal is reached (but keep session running)
-      if (settings.settingsLocked) {
+      if (stats.dailyProgress >= 100 && settings.settingsLocked) {
         setSettings(prev => ({ 
           ...prev, 
           settingsLocked: false
@@ -129,7 +131,7 @@ function App() {
         console.log('🎉 Goal reached! Settings unlocked, timer continues running.');
       }
     }
-  }, [stats.dailyProgress, handleCelebration, settings.settingsLocked, settings.sessionStarted]);
+  }, [stats.dailyProgress, checkGoalCompletion, handleCelebration, settings.settingsLocked, settings.sessionStarted]);
 
   const handleSettingsUpdate = useCallback((newSettings: Partial<WritingSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
@@ -151,9 +153,12 @@ function App() {
       totalSessionTime: 0,
     });
     
+    // Reset celebration state for new session
+    resetCelebration();
+    
     setIsSettingsOpen(false);
     console.log('🚀 Writing session started! Settings are now locked until goal is reached.');
-  }, []);
+  }, [resetCelebration]);
 
   const handleReset = useCallback(() => {
     console.log('🔄 Resetting WriteFlow session...');
@@ -176,6 +181,9 @@ function App() {
       sessionStarted: false,
     }));
     
+    // Reset celebration state
+    resetCelebration();
+    
     // Clear localStorage
     if (isStorageEnabled.current) {
       textStorage.clear();
@@ -188,7 +196,7 @@ function App() {
     setIsSettingsOpen(true);
     
     console.log('✅ WriteFlow session reset complete - settings panel opened');
-  }, []);
+  }, [resetCelebration]);
 
   const handleResetClick = useCallback(() => {
     if (text.trim().length === 0) {
